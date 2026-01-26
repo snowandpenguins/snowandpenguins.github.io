@@ -4,8 +4,16 @@
   <!--
     SP500 — Snow and Penguins 500
     Single-file INDEX.html (dark/futuristic)
-    - Links: X + Telegram channel + Telegram community
-    - Includes a COMMENTED OUT Phantom (trade.phantom.com) embed placeholder
+
+    Adds two embeds:
+    1) SOL current price + chart (TradingView)
+    2) SP500 token price + market cap + chart (Birdeye iframe chart + DexScreener API stats)
+
+    Keeps Phantom (trade.phantom.com) embed placeholder commented out.
+
+    Update requested:
+    - Move the CA variable (TOKEN_MINT) to the TOP of the code for easy access
+    - Add "Buy on Phantom" and "💊 Buy on Pump.fun" buttons (auto-built from TOKEN_MINT)
   -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -17,13 +25,19 @@
   <meta property="og:title" content="Snow and Penguins 500 (SP500)" />
   <meta property="og:description" content="A winter finance meme brand on Solana. Memes first. Community always. Verify links. We never DM first." />
   <meta property="og:type" content="website" />
-  <!-- Optional: add your hosted banner image -->
-  <!-- <meta property="og:image" content="https://your-domain.com/banner.png" /> -->
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="Snow and Penguins 500 (SP500)" />
   <meta name="twitter:description" content="A winter finance meme brand on Solana. Memes first. Community always. Verify links. We never DM first." />
+
+  <!-- =========================
+       EASY ACCESS CONFIG (TOP)
+       ========================= -->
+  <script>
+    // ✅ EDIT THIS ONE LINE WHENEVER YOUR CA CHANGES:
+    window.SP500_TOKEN_MINT = "BpQ72r8okdNrwjT7kNsY6VocV1STVPkmhViKTLDkpump";
+  </script>
 
   <style>
     :root {
@@ -192,6 +206,7 @@
       transition: transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
       box-shadow: 0 10px 28px rgba(0,0,0,0.35);
       user-select: none;
+      white-space: nowrap;
     }
     .btn:hover {
       transform: translateY(-1px);
@@ -210,6 +225,20 @@
       box-shadow:
         0 16px 46px rgba(0,0,0,0.50),
         0 0 0 7px rgba(91,227,255,0.10);
+    }
+    /* NEW: “buy” button variant (same style, a little extra glow) */
+    .btn.buy {
+      border-color: rgba(54,243,184,0.40);
+      background: linear-gradient(135deg, rgba(54,243,184,0.16), rgba(91,227,255,0.10));
+      box-shadow:
+        0 14px 38px rgba(0,0,0,0.45),
+        0 0 0 6px rgba(54,243,184,0.07);
+    }
+    .btn.buy:hover {
+      border-color: rgba(54,243,184,0.65);
+      box-shadow:
+        0 16px 46px rgba(0,0,0,0.50),
+        0 0 0 7px rgba(54,243,184,0.10);
     }
 
     main {
@@ -409,6 +438,97 @@
     }
     .badge .warn { color: var(--warn); }
     .badge .danger { color: var(--danger); }
+
+    /* Market embeds */
+    .market-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 12px;
+    }
+    @media (max-width: 920px) { .market-grid { grid-template-columns: 1fr; } }
+
+    .market-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .market-title {
+      display: grid;
+      gap: 4px;
+    }
+    .market-title h2 {
+      margin: 0;
+      font-size: 18px;
+      letter-spacing: 0.2px;
+    }
+    .market-title small {
+      font-family: var(--mono);
+      color: var(--muted2);
+      font-size: 12px;
+    }
+    .market-stats {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .stat {
+      padding: 10px 12px;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.05);
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--muted);
+      display: inline-flex;
+      align-items: baseline;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .stat b { color: var(--text); font-weight: 900; }
+
+    .embed-wrap {
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(255,255,255,0.04);
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 16px 44px rgba(0,0,0,0.45);
+      position: relative;
+    }
+    .embed-wrap::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(600px 220px at 10% 10%, rgba(91,227,255,0.10), transparent 70%),
+        radial-gradient(600px 220px at 85% 18%, rgba(140,92,255,0.10), transparent 68%);
+      pointer-events: none;
+    }
+    .embed-inner {
+      position: relative;
+      height: 560px;
+    }
+    @media (max-width: 520px) { .embed-inner { height: 520px; } }
+    .embed-inner iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      background: transparent;
+    }
+
+    .fallback {
+      position: relative;
+      padding: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .fallback a { color: rgba(91,227,255,0.90); text-decoration: none; }
+    .fallback a:hover { text-decoration: underline; }
   </style>
 </head>
 
@@ -458,6 +578,14 @@
             </a>
             <a class="btn" href="https://t.me/snowandpenguins" target="_blank" rel="noopener noreferrer">
               📣 Announcements
+            </a>
+
+            <!-- NEW: Buy buttons -->
+            <a class="btn buy" id="buyPhantomBtn" href="#" target="_blank" rel="noopener noreferrer">
+              👻 Buy on Phantom
+            </a>
+            <a class="btn buy" id="buyPumpBtn" href="#" target="_blank" rel="noopener noreferrer">
+              💊 Buy on Pump.fun
             </a>
           </div>
 
@@ -525,7 +653,116 @@
 
     <div class="divider"></div>
 
-    <!--section class="card" aria-label="Price section (placeholder)">
+    <!-- LIVE MARKET (SOL + SP500 TOKEN) -->
+    <section class="card" aria-label="Live market section">
+      <div class="card-inner">
+        <div class="market-head">
+          <div class="market-title">
+            <h2 style="margin:0;">Live Market</h2>
+            <small>SOL chart embed + SP500 token chart embed (with live stats).</small>
+          </div>
+          <div class="badge">
+            <span class="warn">NOTE:</span>
+            <span>If a widget doesn’t load, refresh or try another browser.</span>
+          </div>
+        </div>
+
+        <div class="market-grid" aria-label="Market embeds grid">
+
+          <!-- SOLANA -->
+          <div class="tile" style="padding:18px;">
+            <div class="market-head" style="margin-bottom:12px;">
+              <div class="market-title">
+                <h2 style="margin:0;">Solana (SOL)</h2>
+                <small>Live price + chart</small>
+              </div>
+              <div class="market-stats" aria-label="SOL stats">
+                <div class="stat">Price: <b id="solPrice">Loading…</b></div>
+              </div>
+            </div>
+
+            <div class="embed-wrap">
+              <div class="embed-inner" style="height:560px;">
+                <!-- TradingView Widget BEGIN -->
+                <div class="tradingview-widget-container" style="height:100%;width:100%">
+                  <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
+                  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
+                    {
+                      "autosize": true,
+                      "symbol": "BINANCE:SOLUSDT",
+                      "interval": "60",
+                      "timezone": "Etc/UTC",
+                      "theme": "dark",
+                      "style": "1",
+                      "locale": "en",
+                      "allow_symbol_change": false,
+                      "calendar": false,
+                      "support_host": "https://www.tradingview.com"
+                    }
+                  </script>
+                </div>
+                <!-- TradingView Widget END -->
+              </div>
+            </div>
+
+            <div class="fallback" style="padding-top:10px;">
+              Tip: If you prefer spot markets, switch chart symbol to <b>COINBASE:SOLUSD</b>.
+            </div>
+          </div>
+
+          <!-- SP500 TOKEN -->
+          <div class="tile" style="padding:18px;">
+            <div class="market-head" style="margin-bottom:12px;">
+              <div class="market-title">
+                <h2 style="margin:0;">SP500 Token</h2>
+                <small>Price + market cap + chart</small>
+              </div>
+              <div class="market-stats" aria-label="Token stats">
+                <div class="stat">Price: <b id="tokenPrice">Loading…</b></div>
+                <div class="stat">MCAP: <b id="tokenMcap">Loading…</b></div>
+              </div>
+            </div>
+
+            <div class="embed-wrap">
+              <div class="embed-inner" id="tokenEmbedWrap">
+                <!-- Birdeye token chart iframe -->
+                <iframe
+                  id="tokenChart"
+                  title="SP500 chart"
+                  src="about:blank"
+                  loading="lazy"
+                  referrerpolicy="no-referrer"
+                  allowfullscreen
+                ></iframe>
+              </div>
+            </div>
+
+            <div class="fallback" id="tokenFallback" style="display:none;">
+              Couldn’t load the embedded chart. Open it directly:
+              <a id="tokenLink" href="#" target="_blank" rel="noopener noreferrer">Open chart</a>
+            </div>
+
+            <div class="fallback" style="padding-top:10px;">
+              Contract (mint):
+              <span id="mintText" style="font-family:var(--mono); color:rgba(255,255,255,0.78);"></span>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="badge" style="margin-top: 6px;">
+          <span class="danger">SAFETY:</span>
+          <span>We never DM first. Never send SOL to anyone. Verify links from official sources.</span>
+        </div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- KEEP: Phantom placeholder (commented out) -->
+    <section class="card" aria-label="Price section (placeholder)">
       <div class="card-inner">
         <h2 style="margin:0 0 10px; font-size: 18px;">Live Price (Optional)</h2>
         <p class="sub" style="margin: 0 0 14px; font-size: 14px;">
@@ -533,6 +770,7 @@
           Keep this commented out until you confirm it works in your hosting environment.
         </p>
 
+        <!--
           ===========================
           LIVE PRICE TRACKER (PHANTOM)
           ===========================
@@ -558,7 +796,7 @@
           <span>Keep links in bio/pin for trust. Don’t rely on random DMs.</span>
         </div>
       </div>
-    <section>
+    </section>
   </main>
 
   <footer>
@@ -582,5 +820,162 @@
       Verify official links. We never DM first and we never ask you to send funds.
     </div>
   </footer>
+
+  <script>
+    // =========================
+    // CONFIG (reads from TOP)
+    // =========================
+    const TOKEN_MINT = window.SP500_TOKEN_MINT;
+
+    // Buy links (built from CA)
+    const PHANTOM_TRADE_URL = "https://trade.phantom.com/token/" + encodeURIComponent(TOKEN_MINT);
+    const PUMPFUN_TOKEN_URL = "https://pump.fun/" + encodeURIComponent(TOKEN_MINT);
+
+    // Birdeye iframe chart (token address-based)
+    const BIRDEYE_IFRAME_SRC =
+      "https://birdeye.so/tv-widget/" + TOKEN_MINT +
+      "?chain=solana" +
+      "&viewMode=pair" +
+      "&chartInterval=15" +
+      "&chartType=CANDLE" +
+      "&chartTimezone=Etc%2FUTC" +
+      "&chartLeftToolbar=show" +
+      "&theme=dark";
+
+    const BIRDEYE_DIRECT_LINK =
+      "https://birdeye.so/token/" + TOKEN_MINT + "?chain=solana";
+
+    // ============
+    // FORMATTERS
+    // ============
+    const fmtUSD = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      maximumFractionDigits: 8
+    });
+
+    const fmtCompactUSD = new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      notation: "compact",
+      compactDisplay: "short",
+      maximumFractionDigits: 2
+    });
+
+    function safeNum(n) {
+      const x = Number(n);
+      return Number.isFinite(x) ? x : null;
+    }
+
+    // ============
+    // INIT LINKS / UI
+    // ============
+    function initLinks() {
+      const mintText = document.getElementById("mintText");
+      if (mintText) mintText.textContent = TOKEN_MINT;
+
+      const buyPhantom = document.getElementById("buyPhantomBtn");
+      const buyPump = document.getElementById("buyPumpBtn");
+      if (buyPhantom) buyPhantom.href = PHANTOM_TRADE_URL;
+      if (buyPump) buyPump.href = PUMPFUN_TOKEN_URL;
+    }
+
+    // ============
+    // SOL PRICE (best-effort)
+    // ============
+    async function loadSolPrice() {
+      const el = document.getElementById("solPrice");
+      try {
+        const res = await fetch("https://api.dexscreener.com/latest/dex/search?q=SOL%2FUSDC", { cache: "no-store" });
+        if (!res.ok) throw new Error("SOL search failed");
+        const data = await res.json();
+        const pairs = Array.isArray(data?.pairs) ? data.pairs : [];
+
+        const solanaPairs = pairs.filter(p => (p?.chainId || "").toLowerCase() === "solana");
+        const best = (solanaPairs.length ? solanaPairs : pairs)
+          .slice()
+          .sort((a, b) => (safeNum(b?.liquidity?.usd) || 0) - (safeNum(a?.liquidity?.usd) || 0))[0];
+
+        const price = safeNum(best?.priceUsd);
+        el.textContent = price ? fmtUSD.format(price) : "—";
+      } catch (e) {
+        el.textContent = "—";
+        console.warn("[SOL] price fetch failed:", e);
+      }
+    }
+
+    // ============
+    // TOKEN PRICE + MCAP (DexScreener pools) + CHART (Birdeye)
+    // ============
+    async function loadTokenMarketOnce() {
+      const priceEl = document.getElementById("tokenPrice");
+      const mcapEl  = document.getElementById("tokenMcap");
+      const iframe  = document.getElementById("tokenChart");
+      const fallback = document.getElementById("tokenFallback");
+      const linkEl  = document.getElementById("tokenLink");
+
+      // Always set the chart + direct link
+      if (iframe && iframe.src !== BIRDEYE_IFRAME_SRC) iframe.src = BIRDEYE_IFRAME_SRC;
+      if (linkEl) linkEl.href = BIRDEYE_DIRECT_LINK;
+
+      // Show fallback if iframe blocked
+      let loaded = false;
+      iframe?.addEventListener("load", () => { loaded = true; }, { once: true });
+      setTimeout(() => { if (!loaded && fallback) fallback.style.display = "block"; }, 2500);
+
+      // Start with a friendly state
+      priceEl.textContent = "Loading…";
+      mcapEl.textContent  = "Loading…";
+
+      try {
+        const url = `https://api.dexscreener.com/token-pairs/v1/solana/${TOKEN_MINT}`;
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) throw new Error("DexScreener token-pairs failed");
+        const pools = await res.json();
+
+        // If empty, token likely still pre-DEX (pump.fun bonding curve) or not indexed yet.
+        if (!Array.isArray(pools) || pools.length === 0) {
+          priceEl.textContent = "Indexing (pre-DEX)";
+          mcapEl.textContent  = "Indexing (pre-DEX)";
+          return;
+        }
+
+        // Pick best pool: highest liquidity, then highest 24h volume
+        const best = pools.slice().sort((a, b) => {
+          const lA = safeNum(a?.liquidity?.usd) || 0;
+          const lB = safeNum(b?.liquidity?.usd) || 0;
+          if (lB !== lA) return lB - lA;
+          const vA = safeNum(a?.volume?.h24) || 0;
+          const vB = safeNum(b?.volume?.h24) || 0;
+          return vB - vA;
+        })[0];
+
+        const price = safeNum(best?.priceUsd);
+        const mcap  = safeNum(best?.marketCap) ?? safeNum(best?.fdv);
+
+        priceEl.textContent = price ? fmtUSD.format(price) : "—";
+        mcapEl.textContent  = mcap  ? fmtCompactUSD.format(mcap) : "—";
+
+      } catch (e) {
+        priceEl.textContent = "Indexing (pre-DEX)";
+        mcapEl.textContent  = "Indexing (pre-DEX)";
+        console.warn("[SP500] DexScreener stats unavailable:", e);
+      }
+    }
+
+    function boot() {
+      initLinks();
+      loadSolPrice();
+      loadTokenMarketOnce();
+
+      // Refresh every 15s
+      setInterval(() => {
+        loadSolPrice();
+        loadTokenMarketOnce();
+      }, 15000);
+    }
+
+    boot();
+  </script>
 </body>
 </html>
