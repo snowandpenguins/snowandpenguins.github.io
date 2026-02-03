@@ -1,981 +1,188 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!--
-    SP500 — Snow and Penguins 500
-    Single-file INDEX.html (dark/futuristic)
-
-    Adds two embeds:
-    1) SOL current price + chart (TradingView)
-    2) SP500 token price + market cap + chart (Birdeye iframe chart + DexScreener API stats)
-
-    Keeps Phantom (trade.phantom.com) embed placeholder commented out.
-
-    Update requested:
-    - Move the CA variable (TOKEN_MINT) to the TOP of the code for easy access
-    - Add "Buy on Phantom" and "💊 Buy on Pump.fun" buttons (auto-built from TOKEN_MINT)
-  -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <title>Snow and Penguins 500 (SP500)</title>
-  <meta name="description" content="Snow and Penguins 500 (SP500) — a winter finance meme brand on Solana. Memes first. Community always. Verify links. We never DM first." />
-
-  <!-- Open Graph / Social -->
-  <meta property="og:title" content="Snow and Penguins 500 (SP500)" />
-  <meta property="og:description" content="A winter finance meme brand on Solana. Memes first. Community always. Verify links. We never DM first." />
-  <meta property="og:type" content="website" />
-
-  <!-- Twitter Card -->
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="Snow and Penguins 500 (SP500)" />
-  <meta name="twitter:description" content="A winter finance meme brand on Solana. Memes first. Community always. Verify links. We never DM first." />
-
-  <!-- =========================
-       EASY ACCESS CONFIG (TOP)
-       ========================= -->
-  <script>
-    // ✅ EDIT THIS ONE LINE WHENEVER YOUR CA CHANGES:
-    window.SP500_TOKEN_MINT = "BpQ72r8okdNrwjT7kNsY6VocV1STVPkmhViKTLDkpump";
-  </script>
-
-  <style>
-    :root {
-      --bg: #070A12;
-      --bg2: #0A1022;
-      --card: rgba(255, 255, 255, 0.06);
-      --card2: rgba(255, 255, 255, 0.08);
-      --text: rgba(255, 255, 255, 0.92);
-      --muted: rgba(255, 255, 255, 0.66);
-      --muted2: rgba(255, 255, 255, 0.48);
-      --line: rgba(255, 255, 255, 0.10);
-      --glow: rgba(91, 227, 255, 0.65);
-      --glow2: rgba(140, 92, 255, 0.55);
-      --accent: #5BE3FF;
-      --accent2: #8C5CFF;
-      --good: #36F3B8;
-      --warn: #FFC857;
-      --danger: #FF4D6D;
-      --shadow: 0 20px 60px rgba(0,0,0,0.55);
-      --radius: 18px;
-      --radius2: 28px;
-      --max: 1100px;
-      --mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-      --sans: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
-    }
-
-    * { box-sizing: border-box; }
-    html, body { height: 100%; }
-    body {
-      margin: 0;
-      font-family: var(--sans);
-      color: var(--text);
-      background:
-        radial-gradient(900px 500px at 25% 15%, rgba(91, 227, 255, 0.14), transparent 60%),
-        radial-gradient(800px 500px at 75% 25%, rgba(140, 92, 255, 0.14), transparent 55%),
-        radial-gradient(900px 700px at 40% 90%, rgba(54, 243, 184, 0.08), transparent 60%),
-        linear-gradient(180deg, var(--bg), var(--bg2));
-      overflow-x: hidden;
-    }
-
-    /* Subtle animated grid */
-    .grid {
-      position: fixed;
-      inset: 0;
-      pointer-events: none;
-      background-image:
-        linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px);
-      background-size: 56px 56px;
-      mask-image: radial-gradient(circle at 50% 20%, rgba(0,0,0,1), rgba(0,0,0,0.1) 60%, rgba(0,0,0,0) 78%);
-      opacity: 0.65;
-      animation: gridMove 20s linear infinite;
-    }
-    @keyframes gridMove {
-      from { transform: translateY(0); }
-      to { transform: translateY(56px); }
-    }
-
-    /* Glow orbs */
-    .orb {
-      position: fixed;
-      width: 520px;
-      height: 520px;
-      border-radius: 50%;
-      filter: blur(38px);
-      opacity: 0.18;
-      pointer-events: none;
-      mix-blend-mode: screen;
-    }
-    .orb.one { left: -140px; top: -120px; background: var(--accent); }
-    .orb.two { right: -160px; top: 40px; background: var(--accent2); }
-    .orb.three { left: 18%; bottom: -220px; background: var(--good); opacity: 0.10; }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      backdrop-filter: blur(10px);
-      background: rgba(7, 10, 18, 0.55);
-      border-bottom: 1px solid var(--line);
-    }
-    .nav {
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 14px;
-    }
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-    .logo {
-      width: 42px; height: 42px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, rgba(91,227,255,0.25), rgba(140,92,255,0.25));
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 0 0 6px rgba(91,227,255,0.06);
-      display: grid;
-      place-items: center;
-      position: relative;
-      overflow: hidden;
-    }
-    .logo:before {
-      content: "";
-      position: absolute;
-      inset: -40%;
-      background: conic-gradient(from 120deg, transparent, rgba(91,227,255,0.8), transparent, rgba(140,92,255,0.8), transparent);
-      animation: spin 5.5s linear infinite;
-      opacity: 0.22;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .logo span {
-      position: relative;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      font-family: var(--mono);
-      font-size: 12px;
-      opacity: 0.95;
-    }
-    .brand-text {
-      display: grid;
-      gap: 2px;
-      min-width: 0;
-    }
-    .brand-text b {
-      font-size: 14px;
-      letter-spacing: 0.2px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-    .brand-text small {
-      font-family: var(--mono);
-      color: var(--muted2);
-      font-size: 12px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 10px 14px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.14);
-      background: rgba(255,255,255,0.06);
-      color: var(--text);
-      text-decoration: none;
-      font-weight: 650;
-      font-size: 13px;
-      letter-spacing: 0.2px;
-      transition: transform .15s ease, background .15s ease, border-color .15s ease, box-shadow .15s ease;
-      box-shadow: 0 10px 28px rgba(0,0,0,0.35);
-      user-select: none;
-      white-space: nowrap;
-    }
-    .btn:hover {
-      transform: translateY(-1px);
-      background: rgba(255,255,255,0.10);
-      border-color: rgba(255,255,255,0.22);
-    }
-    .btn.primary {
-      border-color: rgba(91,227,255,0.40);
-      background: linear-gradient(135deg, rgba(91,227,255,0.20), rgba(140,92,255,0.18));
-      box-shadow:
-        0 14px 38px rgba(0,0,0,0.45),
-        0 0 0 6px rgba(91,227,255,0.08);
-    }
-    .btn.primary:hover {
-      border-color: rgba(91,227,255,0.65);
-      box-shadow:
-        0 16px 46px rgba(0,0,0,0.50),
-        0 0 0 7px rgba(91,227,255,0.10);
-    }
-    /* NEW: “buy” button variant (same style, a little extra glow) */
-    .btn.buy {
-      border-color: rgba(54,243,184,0.40);
-      background: linear-gradient(135deg, rgba(54,243,184,0.16), rgba(91,227,255,0.10));
-      box-shadow:
-        0 14px 38px rgba(0,0,0,0.45),
-        0 0 0 6px rgba(54,243,184,0.07);
-    }
-    .btn.buy:hover {
-      border-color: rgba(54,243,184,0.65);
-      box-shadow:
-        0 16px 46px rgba(0,0,0,0.50),
-        0 0 0 7px rgba(54,243,184,0.10);
-    }
-
-    main {
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: 34px 18px 60px;
-    }
-
-    .hero {
-      display: grid;
-      grid-template-columns: 1.25fr 0.75fr;
-      gap: 18px;
-      align-items: stretch;
-    }
-    @media (max-width: 920px) {
-      .hero { grid-template-columns: 1fr; }
-    }
-
-    .card {
-      border-radius: var(--radius2);
-      background: linear-gradient(180deg, rgba(255,255,255,0.08), rgba(255,255,255,0.05));
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: var(--shadow);
-      overflow: hidden;
-      position: relative;
-    }
-    .card::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(600px 220px at 10% 10%, rgba(91,227,255,0.14), transparent 70%),
-        radial-gradient(600px 220px at 85% 18%, rgba(140,92,255,0.14), transparent 68%);
-      pointer-events: none;
-    }
-    .card-inner {
-      position: relative;
-      padding: 26px;
-    }
-
-    .kicker {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.06);
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--muted);
-    }
-    .dot {
-      width: 9px; height: 9px;
-      border-radius: 50%;
-      background: var(--good);
-      box-shadow: 0 0 0 5px rgba(54,243,184,0.14);
-    }
-
-    h1 {
-      margin: 14px 0 10px;
-      font-size: 44px;
-      line-height: 1.05;
-      letter-spacing: -0.8px;
-    }
-    @media (max-width: 520px) {
-      h1 { font-size: 36px; }
-    }
-
-    .sub {
-      color: var(--muted);
-      font-size: 16px;
-      line-height: 1.5;
-      max-width: 60ch;
-    }
-
-    .hero-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 16px;
-    }
-
-    .pillrow {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 18px;
-    }
-    .pill {
-      padding: 10px 12px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--muted);
-      display: inline-flex;
-      gap: 8px;
-      align-items: center;
-    }
-    .pill strong { color: var(--text); font-weight: 800; }
-
-    .side {
-      display: grid;
-      gap: 14px;
-    }
-
-    .mini {
-      border-radius: var(--radius2);
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 16px 44px rgba(0,0,0,0.45);
-      padding: 18px;
-      position: relative;
-      overflow: hidden;
-    }
-    .mini::before {
-      content: "";
-      position: absolute;
-      inset: -50%;
-      background: radial-gradient(circle at 30% 30%, rgba(91,227,255,0.18), transparent 45%),
-                  radial-gradient(circle at 70% 30%, rgba(140,92,255,0.18), transparent 48%);
-      transform: rotate(12deg);
-      opacity: 0.55;
-      pointer-events: none;
-    }
-    .mini > * { position: relative; }
-
-    .mini h2 {
-      margin: 0 0 8px;
-      font-size: 15px;
-      letter-spacing: 0.2px;
-    }
-    .mini p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.45;
-    }
-
-    .section {
-      margin-top: 18px;
-      display: grid;
-      grid-template-columns: 1fr 1fr 1fr;
-      gap: 14px;
-    }
-    @media (max-width: 920px) { .section { grid-template-columns: 1fr; } }
-
-    .tile {
-      border-radius: var(--radius2);
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      box-shadow: 0 14px 38px rgba(0,0,0,0.42);
-      padding: 18px;
-    }
-    .tile h3 {
-      margin: 0 0 8px;
-      font-size: 14px;
-      letter-spacing: 0.2px;
-    }
-    .tile p {
-      margin: 0;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-
-    .divider {
-      height: 1px;
-      background: rgba(255,255,255,0.10);
-      margin: 22px 0;
-    }
-
-    footer {
-      max-width: var(--max);
-      margin: 0 auto;
-      padding: 26px 18px 40px;
-      color: var(--muted2);
-      font-size: 12px;
-      line-height: 1.6;
-    }
-    footer a { color: rgba(91,227,255,0.90); text-decoration: none; }
-    footer a:hover { text-decoration: underline; }
-
-    .badge {
-      font-family: var(--mono);
-      font-size: 12px;
-      padding: 8px 10px;
-      border-radius: 14px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--muted);
-    }
-    .badge .warn { color: var(--warn); }
-    .badge .danger { color: var(--danger); }
-
-    /* Market embeds */
-    .market-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 14px;
-      margin-top: 12px;
-    }
-    @media (max-width: 920px) { .market-grid { grid-template-columns: 1fr; } }
-
-    .market-head {
-      display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-    }
-    .market-title {
-      display: grid;
-      gap: 4px;
-    }
-    .market-title h2 {
-      margin: 0;
-      font-size: 18px;
-      letter-spacing: 0.2px;
-    }
-    .market-title small {
-      font-family: var(--mono);
-      color: var(--muted2);
-      font-size: 12px;
-    }
-    .market-stats {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-    .stat {
-      padding: 10px 12px;
-      border-radius: 16px;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.05);
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--muted);
-      display: inline-flex;
-      align-items: baseline;
-      gap: 8px;
-      white-space: nowrap;
-    }
-    .stat b { color: var(--text); font-weight: 900; }
-
-    .embed-wrap {
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.04);
-      border-radius: 18px;
-      overflow: hidden;
-      box-shadow: 0 16px 44px rgba(0,0,0,0.45);
-      position: relative;
-    }
-    .embed-wrap::before {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(600px 220px at 10% 10%, rgba(91,227,255,0.10), transparent 70%),
-        radial-gradient(600px 220px at 85% 18%, rgba(140,92,255,0.10), transparent 68%);
-      pointer-events: none;
-    }
-    .embed-inner {
-      position: relative;
-      height: 560px;
-    }
-    @media (max-width: 520px) { .embed-inner { height: 520px; } }
-    .embed-inner iframe {
-      width: 100%;
-      height: 100%;
-      border: 0;
-      background: transparent;
-    }
-
-    .fallback {
-      position: relative;
-      padding: 14px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    .fallback a { color: rgba(91,227,255,0.90); text-decoration: none; }
-    .fallback a:hover { text-decoration: underline; }
-  </style>
+  <title>Ascend Dashboard</title>
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 
 <body>
-  <div class="grid"></div>
-  <div class="orb one"></div>
-  <div class="orb two"></div>
-  <div class="orb three"></div>
-
-  <header>
-    <div class="nav">
-      <div class="brand" aria-label="SP500 brand">
-        <div class="logo" aria-hidden="true"><span>SP500</span></div>
-        <div class="brand-text">
-          <b>Snow and Penguins 500</b>
-          <small>Ticker: $SP500 • Solana</small>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="dot"></div>
+        <div>
+          <div class="title">Ascend Dashboard</div>
+          <div class="subtitle">Track habits. Control the arc.</div>
         </div>
       </div>
 
-      <div class="nav-links" aria-label="Primary links">
-        <a class="btn" href="https://x.com/snowandpenguins" target="_blank" rel="noopener noreferrer">X / Twitter</a>
-        <a class="btn" href="https://t.me/snowandpenguins" target="_blank" rel="noopener noreferrer">Telegram Channel</a>
-        <a class="btn primary" href="https://t.me/snowandpenguinscomm" target="_blank" rel="noopener noreferrer">Join Community</a>
+      <div class="filebar">
+        <button id="btnPickFile" class="btn">Connect data.json</button>
+        <button id="btnLoad" class="btn">Load</button>
+        <button id="btnSave" class="btn btnPrimary">Save</button>
+        <span id="fileStatus" class="status">Not connected</span>
       </div>
-    </div>
-  </header>
+    </header>
 
-  <main>
-    <section class="hero" aria-label="Hero section">
-      <div class="card">
-        <div class="card-inner">
-          <div class="kicker"><span class="dot"></span> Winter Finance Meme Index</div>
-
-          <h1>Snow & Penguins 500<br><span style="color: var(--accent);">SP500</span></h1>
-
-          <p class="sub">
-            A dark-mode, high-dopamine meme brand inspired by snow days and market energy.
-            Built for community, culture, and clean vibes. Verify links. We never DM first.
-          </p>
-
-          <div class="hero-actions">
-            <a class="btn primary" href="https://t.me/snowandpenguinscomm" target="_blank" rel="noopener noreferrer">
-              🐧 Join the Lounge
-            </a>
-            <a class="btn" href="https://x.com/snowandpenguins" target="_blank" rel="noopener noreferrer">
-              ❄️ Follow on X
-            </a>
-            <a class="btn" href="https://t.me/snowandpenguins" target="_blank" rel="noopener noreferrer">
-              📣 Announcements
-            </a>
-
-            <!-- NEW: Buy buttons -->
-            <a class="btn buy" id="buyPhantomBtn" href="#" target="_blank" rel="noopener noreferrer">
-              👻 Buy on Phantom
-            </a>
-            <a class="btn buy" id="buyPumpBtn" href="#" target="_blank" rel="noopener noreferrer">
-              💊 Buy on Pump.fun
-            </a>
-          </div>
-
-          <div class="pillrow" aria-label="Key stats">
-            <div class="pill">Ticker: <strong>$SP500</strong></div>
-            <div class="pill">Theme: <strong>Snow • Penguins • Finance</strong></div>
-            <div class="pill">Vibe: <strong>Futuristic Dark</strong></div>
-          </div>
-
-          <div class="divider"></div>
-
-          <div class="badge">
-            <span class="danger">SAFETY:</span>
-            <span>We never DM first. Never send SOL to anyone.</span>
-          </div>
-        </div>
-      </div>
-
-      <div class="side" aria-label="Side cards">
-        <div class="mini">
-          <h2>📌 Verified Links Only</h2>
-          <p>
-            Official links live here and in our pinned posts. If it’s not from the official sources,
-            ignore it.
-          </p>
-        </div>
-
-        <div class="mini">
-          <h2>🧊 The Winter Index</h2>
-          <p>
-            We’re here for memes, culture, and community energy. No promises. No pressure. Just penguins.
-          </p>
-        </div>
-
-        <div class="mini">
-          <h2>⚡ Community First</h2>
-          <p>
-            Join the Telegram community for meme drops, updates, and the coldest vibes on-chain.
-          </p>
-        </div>
-      </div>
-    </section>
-
-    <section class="section" aria-label="Info tiles">
-      <div class="tile">
-        <h3>🚫 No DMs • No “Send SOL”</h3>
-        <p>
-          We will never message you first, and we will never ask you to send SOL for any reason.
-          If someone does, it’s a scam.
-        </p>
-      </div>
-      <div class="tile">
-        <h3>✅ Trustable, Simple, Clean</h3>
-        <p>
-          One brand. One ticker. One vibe. Keep it clean, keep it fun, keep it safe.
-        </p>
-      </div>
-      <div class="tile">
-        <h3>❄️ Built for Shareability</h3>
-        <p>
-          High dopamine visuals + meme formats designed for X and Telegram. Winter season is the meta.
-        </p>
-      </div>
-    </section>
-
-    <div class="divider"></div>
-
-    <!-- LIVE MARKET (SOL + SP500 TOKEN) -->
-    <section class="card" aria-label="Live market section">
-      <div class="card-inner">
-        <div class="market-head">
-          <div class="market-title">
-            <h2 style="margin:0;">Live Market</h2>
-            <small>SOL chart embed + SP500 token chart embed (with live stats).</small>
-          </div>
-          <div class="badge">
-            <span class="warn">NOTE:</span>
-            <span>If a widget doesn’t load, refresh or try another browser.</span>
+    <main class="grid">
+      <!-- Left: Daily logging -->
+      <section class="panel">
+        <div class="panelHeader">
+          <h2>Today</h2>
+          <div class="row">
+            <label class="label">Date</label>
+            <input id="date" type="date" class="input" />
           </div>
         </div>
 
-        <div class="market-grid" aria-label="Market embeds grid">
+        <div class="formGrid">
+          <div class="field">
+            <label>Hours on phone</label>
+            <input id="phoneHours" type="number" step="0.1" min="0" class="input" placeholder="e.g. 4.2" />
+          </div>
 
-          <!-- SOLANA -->
-          <div class="tile" style="padding:18px;">
-            <div class="market-head" style="margin-bottom:12px;">
-              <div class="market-title">
-                <h2 style="margin:0;">Solana (SOL)</h2>
-                <small>Live price + chart</small>
-              </div>
-              <div class="market-stats" aria-label="SOL stats">
-                <div class="stat">Price: <b id="solPrice">Loading…</b></div>
-              </div>
+          <div class="field">
+            <label>Money in bank ($)</label>
+            <input id="moneyBank" type="number" step="1" min="0" class="input" placeholder="e.g. 2400" />
+          </div>
+
+          <div class="field">
+            <label>Gym today?</label>
+            <select id="gym" class="input">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Gym sessions (total)</label>
+            <input id="gymSessions" type="number" step="1" min="0" class="input" placeholder="e.g. 180" />
+            <div class="hint">Tip: if Gym today = Yes, you can bump this by +1.</div>
+          </div>
+
+          <div class="field">
+            <div class="rowBetween">
+              <label>Days since masturbation</label>
+              <label class="toggle">
+                <input id="hideMast" type="checkbox" />
+                <span>Hide</span>
+              </label>
             </div>
+            <input id="daysSinceMast" type="number" step="1" min="0" class="input" placeholder="e.g. 3" />
+            <div class="hint">This is tracked as a number (privacy-friendly).</div>
+          </div>
 
-            <div class="embed-wrap">
-              <div class="embed-inner" style="height:560px;">
-                <!-- TradingView Widget BEGIN -->
-                <div class="tradingview-widget-container" style="height:100%;width:100%">
-                  <div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div>
-                  <script type="text/javascript" src="https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js" async>
-                    {
-                      "autosize": true,
-                      "symbol": "BINANCE:SOLUSDT",
-                      "interval": "60",
-                      "timezone": "Etc/UTC",
-                      "theme": "dark",
-                      "style": "1",
-                      "locale": "en",
-                      "allow_symbol_change": false,
-                      "calendar": false,
-                      "support_host": "https://www.tradingview.com"
-                    }
-                  </script>
-                </div>
-                <!-- TradingView Widget END -->
-              </div>
+          <div class="field">
+            <label>Hours worked today</label>
+            <input id="hoursWorkedToday" type="number" step="0.1" min="0" class="input" placeholder="e.g. 4" />
+            <div class="hint">We compute “Hours worked this week” automatically.</div>
+          </div>
+
+          <div class="field">
+            <label>Job count</label>
+            <input id="jobCount" type="number" step="1" min="0" class="input" placeholder="e.g. 1" />
+          </div>
+
+          <div class="field">
+            <label>Freelance completions (total)</label>
+            <input id="freelanceCompletions" type="number" step="1" min="0" class="input" placeholder="e.g. 0" />
+          </div>
+
+          <div class="field">
+            <label>Time on treadmill (minutes)</label>
+            <input id="treadmillMins" type="number" step="1" min="0" class="input" placeholder="e.g. 20" />
+          </div>
+
+          <div class="field">
+            <label>HW completed?</label>
+            <select id="hwDone" class="input">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Overall class average (%)</label>
+            <input id="classAvg" type="number" step="0.1" min="0" max="100" class="input" placeholder="e.g. 92.4" />
+            <div class="hint">Use until June 25, then again when school starts.</div>
+          </div>
+
+          <div class="field">
+            <label>Teeth brushed (times)</label>
+            <input id="teeth" type="number" step="1" min="0" max="5" class="input" placeholder="e.g. 2" />
+          </div>
+
+          <div class="field">
+            <label>Retainer worn?</label>
+            <select id="retainer" class="input">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Contacts removed?</label>
+            <select id="contactsRemoved" class="input">
+              <option value="0">No</option>
+              <option value="1">Yes</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button id="btnFillLatest" class="btn">Fill from latest</button>
+          <button id="btnLog" class="btn btnPrimary">Log / Update Day</button>
+          <div id="logStatus" class="status"></div>
+        </div>
+      </section>
+
+      <!-- Right: Charts + stats -->
+      <section class="panel">
+        <div class="panelHeader">
+          <h2>Charts</h2>
+
+          <div class="row">
+            <label class="label">Metric</label>
+            <select id="metric" class="input"></select>
+          </div>
+
+          <div class="seg">
+            <button class="segBtn active" data-range="1D">1D</button>
+            <button class="segBtn" data-range="1W">1W</button>
+            <button class="segBtn" data-range="1Y">1Y</button>
+            <button class="segBtn" data-range="ALL">ALL</button>
+          </div>
+
+          <div class="stats">
+            <div class="statCard">
+              <div class="statLabel">Average</div>
+              <div id="avgVal" class="statValue">—</div>
             </div>
-
-            <div class="fallback" style="padding-top:10px;">
-              Tip: If you prefer spot markets, switch chart symbol to <b>COINBASE:SOLUSD</b>.
+            <div class="statCard">
+              <div class="statLabel">Change (Δ)</div>
+              <div id="deltaVal" class="statValue">—</div>
+            </div>
+            <div class="statCard">
+              <div class="statLabel">Hours worked this week</div>
+              <div id="weekHours" class="statValue">—</div>
             </div>
           </div>
-
-          <!-- SP500 TOKEN -->
-          <div class="tile" style="padding:18px;">
-            <div class="market-head" style="margin-bottom:12px;">
-              <div class="market-title">
-                <h2 style="margin:0;">SP500 Token</h2>
-                <small>Price + market cap + chart</small>
-              </div>
-              <div class="market-stats" aria-label="Token stats">
-                <div class="stat">Price: <b id="tokenPrice">Loading…</b></div>
-                <div class="stat">MCAP: <b id="tokenMcap">Loading…</b></div>
-              </div>
-            </div>
-
-            <div class="embed-wrap">
-              <div class="embed-inner" id="tokenEmbedWrap">
-                <!-- Birdeye token chart iframe -->
-                <iframe
-                  id="tokenChart"
-                  title="SP500 chart"
-                  src="about:blank"
-                  loading="lazy"
-                  referrerpolicy="no-referrer"
-                  allowfullscreen
-                ></iframe>
-              </div>
-            </div>
-
-            <div class="fallback" id="tokenFallback" style="display:none;">
-              Couldn’t load the embedded chart. Open it directly:
-              <a id="tokenLink" href="#" target="_blank" rel="noopener noreferrer">Open chart</a>
-            </div>
-
-            <div class="fallback" style="padding-top:10px;">
-              Contract (mint):
-              <span id="mintText" style="font-family:var(--mono); color:rgba(255,255,255,0.78);"></span>
-            </div>
-          </div>
-
         </div>
 
-        <div class="divider"></div>
-
-        <div class="badge" style="margin-top: 6px;">
-          <span class="danger">SAFETY:</span>
-          <span>We never DM first. Never send SOL to anyone. Verify links from official sources.</span>
+        <div class="chartWrap">
+          <canvas id="chart"></canvas>
         </div>
-      </div>
-    </section>
 
-    <div class="divider"></div>
-
-    <!-- KEEP: Phantom placeholder (commented out) -->
-    <section class="card" aria-label="Price section (placeholder)">
-      <div class="card-inner">
-        <h2 style="margin:0 0 10px; font-size: 18px;">Live Price (Optional)</h2>
-        <p class="sub" style="margin: 0 0 14px; font-size: 14px;">
-          If you want a live chart/trade widget, you can embed a Phantom trade view (if embedding is allowed).
-          Keep this commented out until you confirm it works in your hosting environment.
-        </p>
-
-        <!--
-          ===========================
-          LIVE PRICE TRACKER (PHANTOM)
-          ===========================
-          NOTE:
-          - Phantom may block iframes via CSP/X-Frame-Options, so this might not render.
-          - Replace TOKEN_ADDRESS_HERE with your actual mint/contract address after launch.
-          - You can also embed a DEXScreener widget instead if Phantom blocks.
-
-          Example (placeholder):
-          <div style="border:1px solid rgba(255,255,255,0.12); border-radius:18px; overflow:hidden;">
-            <iframe
-              src="https://trade.phantom.com/?token=TOKEN_ADDRESS_HERE"
-              style="width:100%; height:720px; border:0; background:transparent;"
-              loading="lazy"
-              allow="clipboard-read; clipboard-write"
-              referrerpolicy="no-referrer"
-            ></iframe>
-          </div>
-        -->
-
-        <div class="badge" style="margin-top: 10px;">
-          <span class="warn">TIP:</span>
-          <span>Keep links in bio/pin for trust. Don’t rely on random DMs.</span>
+        <div class="footnote">
+          Save mode: direct file save (Chrome/Edge) or download fallback.
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
+    </main>
+  </div>
 
-  <footer>
-    <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between;">
-      <div>
-        <div><b style="color: rgba(255,255,255,0.86);">Snow and Penguins 500 (SP500)</b></div>
-        <div>❄️🐧 Winter finance meme brand on Solana.</div>
-      </div>
-      <div style="display:flex; gap:10px; flex-wrap:wrap;">
-        <a href="https://x.com/snowandpenguins" target="_blank" rel="noopener noreferrer">X</a>
-        <a href="https://t.me/snowandpenguins" target="_blank" rel="noopener noreferrer">Telegram Channel</a>
-        <a href="https://t.me/snowandpenguinscomm" target="_blank" rel="noopener noreferrer">Telegram Community</a>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
-    <div>
-      <span style="opacity:0.9;">Safety:</span>
-      This site is for entertainment and community updates. Nothing here is financial advice.
-      Verify official links. We never DM first and we never ask you to send funds.
-    </div>
-  </footer>
-
-  <script>
-    // =========================
-    // CONFIG (reads from TOP)
-    // =========================
-    const TOKEN_MINT = window.SP500_TOKEN_MINT;
-
-    // Buy links (built from CA)
-    const PHANTOM_TRADE_URL = "https://trade.phantom.com/token/" + encodeURIComponent(TOKEN_MINT);
-    const PUMPFUN_TOKEN_URL = "https://pump.fun/" + encodeURIComponent(TOKEN_MINT);
-
-    // Birdeye iframe chart (token address-based)
-    const BIRDEYE_IFRAME_SRC =
-      "https://birdeye.so/tv-widget/" + TOKEN_MINT +
-      "?chain=solana" +
-      "&viewMode=pair" +
-      "&chartInterval=15" +
-      "&chartType=CANDLE" +
-      "&chartTimezone=Etc%2FUTC" +
-      "&chartLeftToolbar=show" +
-      "&theme=dark";
-
-    const BIRDEYE_DIRECT_LINK =
-      "https://birdeye.so/token/" + TOKEN_MINT + "?chain=solana";
-
-    // ============
-    // FORMATTERS
-    // ============
-    const fmtUSD = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      maximumFractionDigits: 8
-    });
-
-    const fmtCompactUSD = new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-      notation: "compact",
-      compactDisplay: "short",
-      maximumFractionDigits: 2
-    });
-
-    function safeNum(n) {
-      const x = Number(n);
-      return Number.isFinite(x) ? x : null;
-    }
-
-    // ============
-    // INIT LINKS / UI
-    // ============
-    function initLinks() {
-      const mintText = document.getElementById("mintText");
-      if (mintText) mintText.textContent = TOKEN_MINT;
-
-      const buyPhantom = document.getElementById("buyPhantomBtn");
-      const buyPump = document.getElementById("buyPumpBtn");
-      if (buyPhantom) buyPhantom.href = PHANTOM_TRADE_URL;
-      if (buyPump) buyPump.href = PUMPFUN_TOKEN_URL;
-    }
-
-    // ============
-    // SOL PRICE (best-effort)
-    // ============
-    async function loadSolPrice() {
-      const el = document.getElementById("solPrice");
-      try {
-        const res = await fetch("https://api.dexscreener.com/latest/dex/search?q=SOL%2FUSDC", { cache: "no-store" });
-        if (!res.ok) throw new Error("SOL search failed");
-        const data = await res.json();
-        const pairs = Array.isArray(data?.pairs) ? data.pairs : [];
-
-        const solanaPairs = pairs.filter(p => (p?.chainId || "").toLowerCase() === "solana");
-        const best = (solanaPairs.length ? solanaPairs : pairs)
-          .slice()
-          .sort((a, b) => (safeNum(b?.liquidity?.usd) || 0) - (safeNum(a?.liquidity?.usd) || 0))[0];
-
-        const price = safeNum(best?.priceUsd);
-        el.textContent = price ? fmtUSD.format(price) : "—";
-      } catch (e) {
-        el.textContent = "—";
-        console.warn("[SOL] price fetch failed:", e);
-      }
-    }
-
-    // ============
-    // TOKEN PRICE + MCAP (DexScreener pools) + CHART (Birdeye)
-    // ============
-    async function loadTokenMarketOnce() {
-      const priceEl = document.getElementById("tokenPrice");
-      const mcapEl  = document.getElementById("tokenMcap");
-      const iframe  = document.getElementById("tokenChart");
-      const fallback = document.getElementById("tokenFallback");
-      const linkEl  = document.getElementById("tokenLink");
-
-      // Always set the chart + direct link
-      if (iframe && iframe.src !== BIRDEYE_IFRAME_SRC) iframe.src = BIRDEYE_IFRAME_SRC;
-      if (linkEl) linkEl.href = BIRDEYE_DIRECT_LINK;
-
-      // Show fallback if iframe blocked
-      let loaded = false;
-      iframe?.addEventListener("load", () => { loaded = true; }, { once: true });
-      setTimeout(() => { if (!loaded && fallback) fallback.style.display = "block"; }, 2500);
-
-      // Start with a friendly state
-      priceEl.textContent = "Loading…";
-      mcapEl.textContent  = "Loading…";
-
-      try {
-        const url = `https://api.dexscreener.com/token-pairs/v1/solana/${TOKEN_MINT}`;
-        const res = await fetch(url, { cache: "no-store" });
-        if (!res.ok) throw new Error("DexScreener token-pairs failed");
-        const pools = await res.json();
-
-        // If empty, token likely still pre-DEX (pump.fun bonding curve) or not indexed yet.
-        if (!Array.isArray(pools) || pools.length === 0) {
-          priceEl.textContent = "Indexing (pre-DEX)";
-          mcapEl.textContent  = "Indexing (pre-DEX)";
-          return;
-        }
-
-        // Pick best pool: highest liquidity, then highest 24h volume
-        const best = pools.slice().sort((a, b) => {
-          const lA = safeNum(a?.liquidity?.usd) || 0;
-          const lB = safeNum(b?.liquidity?.usd) || 0;
-          if (lB !== lA) return lB - lA;
-          const vA = safeNum(a?.volume?.h24) || 0;
-          const vB = safeNum(b?.volume?.h24) || 0;
-          return vB - vA;
-        })[0];
-
-        const price = safeNum(best?.priceUsd);
-        const mcap  = safeNum(best?.marketCap) ?? safeNum(best?.fdv);
-
-        priceEl.textContent = price ? fmtUSD.format(price) : "—";
-        mcapEl.textContent  = mcap  ? fmtCompactUSD.format(mcap) : "—";
-
-      } catch (e) {
-        priceEl.textContent = "Indexing (pre-DEX)";
-        mcapEl.textContent  = "Indexing (pre-DEX)";
-        console.warn("[SP500] DexScreener stats unavailable:", e);
-      }
-    }
-
-    function boot() {
-      initLinks();
-      loadSolPrice();
-      loadTokenMarketOnce();
-
-      // Refresh every 15s
-      setInterval(() => {
-        loadSolPrice();
-        loadTokenMarketOnce();
-      }, 15000);
-    }
-
-    boot();
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
