@@ -202,6 +202,9 @@ body{
   grid-template-columns: 1fr 1fr 1fr;
   gap:10px;
 }
+.miniStats{
+  margin-top: 12px;
+}
 .statCard{
   border: 1px solid rgba(255,255,255,.10);
   background: rgba(0,0,0,.12);
