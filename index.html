@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="An independent, nonfunctional CSS study of the Snapchat login screen. This is not Snapchat and cannot accept credentials.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; img-src 'self'; form-action 'none'; base-uri 'none'; connect-src 'none'">
+  <title>Visual demo — Not Snapchat</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="demo-notice">
+    <strong>VISUAL DEMO — THIS IS NOT SNAPCHAT</strong>
+    <span>Not affiliated with Snap Inc. No login, data entry, or credential collection.</span>
+  </header>
+  <main>
+    <section class="login-card" aria-labelledby="login-heading" aria-describedby="demo-detail">
+      <img class="ghost" src="ghost.svg" width="60" height="60" alt="Snapchat logo, reproduced for this independent visual study">
+      <h1 id="login-heading">Log in to Snapchat</h1>
+      <p class="demo-detail" id="demo-detail">Nonfunctional design study</p>
+      <div class="sample-field">
+        <p class="field-label">Username or Email</p>
+        <div class="field-display" aria-label="Static example username: demo.user. Not an input.">demo.user</div>
+      </div>
+      <span class="phone-option">Use phone number instead</span>
+      <button class="next" type="button" disabled title="Disabled: this is a visual demo">Next</button>
+      <div class="divider"><span>OR</span></div>
+      <button class="alternative" type="button" disabled title="Disabled: no Google sign-in is connected"><span class="google-mark" aria-hidden="true">G</span>Continue with Google</button>
+      <button class="alternative passkey" type="button" disabled title="Disabled: no passkey authentication is connected"><svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M15.5 2.5a6 6 0 0 0-5.83 7.42l-6.38 6.37a1 1 0 0 0-.29.71v3a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1.5H9.5a1 1 0 0 0 1-1V16H12a1 1 0 0 0 .7-.29l1.38-1.37A6 6 0 1 0 15.5 2.5Zm1.75 6a1.75 1.75 0 1 1 0-3.5 1.75 1.75 0 0 1 0 3.5Z" fill="currentColor"/></svg>Sign in with a passkey</button>
+    </section>
+    <p class="signup">New to Snapchat? <span>Sign Up</span></p>
+    <p class="static-note">All controls are visual examples and are disabled.</p>
+  </main>
+  <footer>
+    <div class="footer-columns" aria-label="Noninteractive footer typography study">
+      <section><h2>Company</h2><ul><li>Snap Inc.</li><li>Careers</li><li>News</li></ul><div class="language"><h2>Language</h2><div class="language-display">English (US)<span aria-hidden="true">⌄</span></div></div></section>
+      <section><h2>Community</h2><ul><li>Support</li><li>Community Guidelines</li><li>Safety Center</li></ul></section>
+      <section><h2>Advertising</h2><ul><li>Buy Ads</li><li>Advertising Policies</li><li>Political Ads Library</li><li>Brand Guidelines</li><li>Promotions Rules</li></ul></section>
+      <section><h2>Legal</h2><ul><li>Privacy Center</li><li>Your Privacy Choices</li><li>Cookie Policy</li><li>Report Infringement</li><li>Custom Creative Tools Terms</li><li>Community Geofilter Terms</li><li>Lens Studio Terms</li></ul></section>
+    </div>
+    <div class="footer-bottom"><div><span>Privacy Policy</span><span>Terms of Service</span><span>Funny Videos</span><strong>Independent visual demo</strong></div></div>
+  </footer>
+</body>
+</html>
